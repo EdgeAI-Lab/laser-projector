@@ -31,3 +31,10 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Keil
+DebugConfig/
+Listings/
+Objects/
+*.uvguix.*
+*.uvoptx
