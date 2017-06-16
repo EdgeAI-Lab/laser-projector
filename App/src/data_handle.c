@@ -123,7 +123,7 @@ void cmd_handle(void)
 	
 		case READ:
 			
-			//read_cmd_handle();
+			read_cmd_handle();
 		
 		break;
 		
@@ -142,11 +142,27 @@ void cmd_handle(void)
 }
 
 
-
+void read_cmd_handle(void)
+{
+	uint8_t voltage[8] = {0};
+	
+	switch(data_handle_buf[DEVICE_ENDPOINT])
+	{
+		
+		case 0x19:
+			mcp4728_ReadRegEEPROM(voltage);
+	
+			data_upload(0x19, voltage, 8);
+		
+		break;
+	}
+}
 
 void write_cmd_handle(void)
 {
 
+	uint8_t voltage[8] = {0};
+	
 	switch(data_handle_buf[DEVICE_ENDPOINT])
 	{
 		case RED_LIGHT_ENDPOINT:
@@ -154,6 +170,9 @@ void write_cmd_handle(void)
 			if(data_handle_buf[DATA] == 0x30) //attrID set DAC
 			{
 				single_write(0x00,(float)(data_handle_buf[DATA+2]*100.0 + data_handle_buf[DATA+3])/100.0);
+				mcp4728_ReadRegEEPROM(voltage);
+	
+				data_upload(0x19, voltage, 8);
 			}
 			
 			if(data_handle_buf[DATA] == 0x20) //attrID switch
@@ -161,13 +180,13 @@ void write_cmd_handle(void)
 				if(data_handle_buf[DATA+2] == 0x01)
 				{
 					RED_ENABLE();
-					save_enable_state(RED_CHANNEL,TURE);
+					save_enable_state(RED_CHANNEL,TRUE);
 					
 				}
 				else if(data_handle_buf[DATA+2] == 0x00)
 				{
 					RED_DISABLE();
-					save_enable_state(RED_CHANNEL,FLASE);
+					save_enable_state(RED_CHANNEL,FALSE);
 				}
 				
 			}
@@ -179,6 +198,9 @@ void write_cmd_handle(void)
 			if(data_handle_buf[DATA] == 0x30) // set DAC
 			{
 				single_write(0x02,(float)(data_handle_buf[DATA+2]*100 + data_handle_buf[DATA+3])/100.0);
+				mcp4728_ReadRegEEPROM(voltage);
+	
+				data_upload(0x19, voltage, 8);
 			}
 			
 			if(data_handle_buf[DATA] == 0x20)
@@ -186,12 +208,12 @@ void write_cmd_handle(void)
 				if(data_handle_buf[DATA+2] == 0x01)
 				{
 					GREEN_ENABLE();
-					save_enable_state(GREEN_CHANNEL,TURE);
+					save_enable_state(GREEN_CHANNEL,TRUE);
 				}
 				else if(data_handle_buf[DATA+2] == 0x00)
 				{
 					GREEN_DISABLE();
-					save_enable_state(GREEN_CHANNEL,FLASE);
+					save_enable_state(GREEN_CHANNEL,FALSE);
 				}
 			}
 		
@@ -202,6 +224,9 @@ void write_cmd_handle(void)
 			if(data_handle_buf[DATA] == 0x30) // set DAC
 			{
 				single_write(0x04,(float)(data_handle_buf[DATA+2]*100 + data_handle_buf[DATA+3])/100.0);
+				mcp4728_ReadRegEEPROM(voltage);
+	
+				data_upload(0x19, voltage, 8);
 			}
 			
 			if(data_handle_buf[DATA] == 0x20)
@@ -209,12 +234,12 @@ void write_cmd_handle(void)
 				if(data_handle_buf[DATA+2] == 0x01)
 				{
 					BLUE_ENABLE();
-					save_enable_state(BLUE_CHANNEL,TURE);
+					save_enable_state(BLUE_CHANNEL,TRUE);
 				}
 				else if(data_handle_buf[DATA+2] == 0x00)
 				{
 					BLUE_DISABLE();
-					save_enable_state(BLUE_CHANNEL,FLASE);
+					save_enable_state(BLUE_CHANNEL,FALSE);
 				}
 			}
 		
@@ -225,6 +250,9 @@ void write_cmd_handle(void)
 			if(data_handle_buf[DATA] == 0x30) // set DAC
 			{
 				single_write(0x06,(float)(data_handle_buf[DATA+2]*100 + data_handle_buf[DATA+3])/100.0);
+				mcp4728_ReadRegEEPROM(voltage);
+	
+				data_upload(0x19, voltage, 8);
 			}
 			
 			if(data_handle_buf[DATA] == 0x20)
@@ -232,12 +260,12 @@ void write_cmd_handle(void)
 				if(data_handle_buf[DATA+2] == 0x01)
 				{
 					GREEN532_ENABLE();
-					save_enable_state(GREEN532_CHANNEL,TURE);
+					save_enable_state(GREEN532_CHANNEL,TRUE);
 				}
 				else if(data_handle_buf[DATA+2] == 0x00)
 				{
 					GREEN532_DISABLE();
-					save_enable_state(GREEN532_CHANNEL,FLASE);
+					save_enable_state(GREEN532_CHANNEL,FALSE);
 				}
 			}
 		

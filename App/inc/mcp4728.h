@@ -38,6 +38,8 @@ void fast_write(uint16_t *value);
 void mcp4728_write_vref(uint8_t vref);
 void mcp4728_write_gain(uint8_t gain);
 void single_write(uint8_t channel, float value);
+static void MCP4728_DMA_Config(uint8_t* buffer, uint8_t NumData);
+void mcp4728_ReadRegEEPROM(uint8_t mcp4728_BufferRX[24]);
 
 
 #endif

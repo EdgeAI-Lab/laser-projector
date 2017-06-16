@@ -6,7 +6,7 @@
 
 void mcp3202_init(void)
 {
-	SPI_InitTypeDef  SPI_InitStructure;
+//	SPI_InitTypeDef  SPI_InitStructure;
 
   mcp3202_low_level_init();
     

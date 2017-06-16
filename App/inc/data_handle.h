@@ -7,6 +7,6 @@
 void cmd_handle(void);
 void frame_data_prase(void);
 void write_cmd_handle(void);
-
+void read_cmd_handle(void);
 
 #endif

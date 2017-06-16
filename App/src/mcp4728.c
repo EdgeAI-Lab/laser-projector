@@ -55,6 +55,122 @@ void mcp4728_low_evel_init(void)
 	
 }
 
+/**
+  * @brief  
+  * @param  None
+  * @retval 
+  */
+void mcp4728_ReadRegEEPROM(uint8_t voltage[8])
+{   
+	
+	uint8_t mcp4728_BufferRX[24] = {0};
+  /* Test on BUSY Flag */
+
+  while (I2C_GetFlagStatus(I2C1,I2C_FLAG_BUSY));
+  
+  /* Configure DMA Peripheral */
+  MCP4728_DMA_Config((uint8_t*)mcp4728_BufferRX, 24);  
+  
+  /* Enable DMA NACK automatic generation */
+  I2C_DMALastTransferCmd(I2C1, ENABLE);
+  
+  /* Send START condition a second time */  
+  I2C_GenerateSTART(I2C1, ENABLE);
+  
+  /* Test on SB Flag */
+  while (!I2C_GetFlagStatus(I2C1,I2C_FLAG_SB)) ;
+  
+  /* Send LM75 address for read */
+  I2C_Send7bitAddress(I2C1, DEVICE_CODE, I2C_Direction_Receiver);
+  
+  /* Test on ADDR Flag */
+  while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))   ;
+  
+  /* Enable I2C DMA request */
+  I2C_DMACmd(I2C1,ENABLE);
+  
+  /* Enable DMA RX Channel */
+  DMA_Cmd(DMA1_Channel7, ENABLE);
+  
+  /* Wait until DMA Transfer Complete */
+  while (!DMA_GetFlagStatus(DMA1_FLAG_TC7));    
+  
+  /* Send STOP Condition */
+  I2C_GenerateSTOP(I2C1, ENABLE);
+  
+  /* Disable DMA RX Channel */
+  DMA_Cmd(DMA1_Channel7, DISABLE);
+  
+  /* Disable I2C DMA request */  
+  I2C_DMACmd(I2C1,DISABLE);
+  
+  /* Clear DMA RX Transfer Complete Flag */
+  DMA_ClearFlag(DMA1_FLAG_TC7);
+
+	
+	// red light
+	voltage[0] = mcp4728_BufferRX[1];
+	voltage[1] = mcp4728_BufferRX[2];
+	
+	// green light
+	voltage[2] = mcp4728_BufferRX[7];
+	voltage[3] = mcp4728_BufferRX[8];
+	
+	// blue light
+	voltage[4] = mcp4728_BufferRX[13];
+	voltage[5] = mcp4728_BufferRX[14];
+	
+	// green532 light
+	voltage[6] = mcp4728_BufferRX[19];
+	voltage[7] = mcp4728_BufferRX[20];
+  
+}
+
+
+/**
+  * @brief  Configure the DMA Peripheral used to handle communication via I2C.
+  * @param  None
+  * @retval None
+  */
+
+static void MCP4728_DMA_Config(uint8_t* buffer, uint8_t NumData)
+{
+  DMA_InitTypeDef DMA_InitStructure;
+  
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+  
+  /* Initialize the DMA_PeripheralBaseAddr member */
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&I2C1->DR;
+  /* Initialize the DMA_MemoryBaseAddr member */
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)buffer;
+   /* Initialize the DMA_PeripheralInc member */
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  /* Initialize the DMA_MemoryInc member */
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  /* Initialize the DMA_PeripheralDataSize member */
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  /* Initialize the DMA_MemoryDataSize member */
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  /* Initialize the DMA_Mode member */
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  /* Initialize the DMA_Priority member */
+  DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+  /* Initialize the DMA_M2M member */
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+
+	/* Initialize the DMA_DIR member */
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	
+	/* Initialize the DMA_BufferSize member */
+	DMA_InitStructure.DMA_BufferSize = NumData;
+	
+	DMA_DeInit(DMA1_Channel7);
+	
+	DMA_Init(DMA1_Channel7, &DMA_InitStructure);
+
+}
+
+
 
 /*
  * test connect
@@ -151,7 +267,7 @@ void single_write(uint8_t channel, float value)
 	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 	
 	I2C_SendData(I2C1,(uint8_t)(temp&0xFF));
-	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
 	
 	/* Send STOP Condition */
   I2C_GenerateSTOP(I2C1, ENABLE);
@@ -175,7 +291,7 @@ void mcp4728_write_vref(uint8_t vref)
 
 	// send high byte
 	I2C_SendData(I2C1,WRITEVREF | (vref & 0x0F));
-	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
 	
 	/* Send STOP Condition */
   I2C_GenerateSTOP(I2C1, ENABLE);
@@ -198,7 +314,7 @@ void mcp4728_write_gain(uint8_t gain)
 	
 	// send high byte
 	I2C_SendData(I2C1,WRITEGAIN | (gain & 0x0F));
-	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
 	
 	/* Send STOP Condition */
   I2C_GenerateSTOP(I2C1, ENABLE);

@@ -8,8 +8,8 @@
 #define BLUE_CHANNEL      ((uint8_t)0x03)
 #define GREEN532_CHANNEL  ((uint8_t)0x04)
 
-#define TURE              ((uint8_t)0x01)
-#define FLASE             ((uint8_t)0x00)
+//#define TRUE              ((uint8_t)0x01)
+//#define FLASE             ((uint8_t)0x00)
 
 
 void save_enable_state(uint8_t channel, uint8_t state);

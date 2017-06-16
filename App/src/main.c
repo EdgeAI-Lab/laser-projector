@@ -25,14 +25,14 @@ CycQueue *q = NULL;
 int i = 0;
 uint8_t value[16] = {0};
 uint16_t dac_value[4] = {1,2,3,4};
+uint8_t voltage[8] = {0};
+
 
 int main(void)
 {
 
-		uint16_t ch_state = 0;
-		
-		
-	
+	uint16_t ch_state = 0;
+
 	q = CycQueueInit();
 	
 	if(q == NULL)
@@ -53,17 +53,20 @@ int main(void)
 	//mcp4728_write_vref(0);// VREF = VDD
 	//fast_write(dac_value);
 	
+//	mcp4728_ReadRegEEPROM(voltage);
+//	
+//	data_upload(0x19, voltage, 8);
+	
 	mcp3202_init();
 	uint8_t adc[2] = {0};
 	//volatile uint16_t adc0 = 0;
 	//volatile uint16_t adc1 = 0;
 
-	set_enable_state();
+//	set_enable_state();
 	
 	while(1)
 	{
-		
-		
+
 		frame_data_prase();
 
 		adc[0] = (uint8_t)read_temperature(0);
@@ -133,11 +136,13 @@ void test_io(void)
 
 }
 
+
+
 void set_enable_state(void)
 {
 	uint8_t i;
 	uint8_t state = get_enable_state();
-	printf("read state: %X\n",state);
+//	printf("read state: %X\n",state);
 	for(i=0;i<4;i++)
 	{
 		switch( state & (0x08 >> i) )
