@@ -1,2 +1,0 @@
-# laser-projector
-laser projector
